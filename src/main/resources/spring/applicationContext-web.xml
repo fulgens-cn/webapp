@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+
+    <!-- 配置Controller组件扫描 -->
+    <context:component-scan base-package="cn.fulgens.controller"/>
+
+    <!-- 配置注解驱动 -->
+    <mvc:annotation-driven/>
+
+    <!-- 配置InternalResourceViewResolver视图解析器 -->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <!-- 前缀 -->
+        <property name="prefix" value="/WEB-INF/views/" />
+        <!-- 后缀 -->
+        <property name="suffix" value=".jsp" />
+    </bean>
+
+    <!-- 配置Thymeleaf视图解析器 -->
+    <!-- 配置模板解析器 -->
+    <!-- Thymeleaf3使用ITemplateResolver接口，SpringResourceTemplateResolver实现类 -->
+    <!-- Thymeleaf3之前使用TemplateResolver接口，ServletContextTemplateResolver实现类 -->
+    <bean id="templateResolver" class="org.thymeleaf.spring4.templateresolver.SpringResourceTemplateResolver">
+        <property name="prefix" value="/WEB-INF/templates/" />
+        <property name="suffix" value=".html" />
+        <property name="templateMode" value="HTML5" />
+        <property name="characterEncoding" value="UTF-8" />
+    </bean>
+    <!-- 配置模板引擎 -->
+    <bean id="templateEngine" class="org.thymeleaf.spring4.SpringTemplateEngine" >
+        <!-- 注入模板解析器 -->
+        <property name="templateResolver" ref="templateResolver" />
+    </bean>
+    <!-- 配置Thymeleaf视图解析器 -->
+    <bean id="viewResolver" class="org.thymeleaf.spring4.view.ThymeleafViewResolver" >
+        <!-- 注入模板引擎 -->
+        <property name="templateEngine" ref="templateEngine" />
+    </bean>
+
+    <!-- 放行静态资源 -->
+    <mvc:default-servlet-handler />
+
+    <!-- 国际化信息源 -->
+    <!-- 国际化信息源ResourceBundleMessageSource -->
+    <!-- 需配合spring标签<s:message code="..." />使用，会在类路径下查找信息源配置文件 -->
+    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource" >
+        <!-- 设置国际化信息源的基本名称 -->
+        <property name="basename" value="messages" />
+    </bean>
+
+    <!-- 国际化信息源ReloadableResourceBundleMessageSource -->
+    <!-- 不同于ResourceBundleMessageSource它能够重新加载信息属性，而不必重新编译或重启应用 -->
+    <!-- baseName属性可以设置在类路径下（以"classpath:"作为前缀）、文件系统中（以"file:"作为前缀）或web应用的根路径下（没有前缀） -->
+    <bean class="org.springframework.context.support.ReloadableResourceBundleMessageSource" >
+        <property name="basename" value="messages" />
+        <property name="cacheSeconds" value="10" />
+    </bean>
+
+    <!-- 配置文件上传解析器 -->
+    <!-- StandardServletMultipartResolver（依赖于servlet3.0对multipart请求的支持，始于spring3.1）-->
+    <!-- xml配置需要在web.xml中配置DispatcherServlet时使用<multipart-config>标签来进行上传文件限制 -->
+    <!-- 注意：必须配置临时目录 -->
+    <bean class="org.springframework.web.multipart.support.StandardServletMultipartResolver" />
+
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver" >
+        <property name="maxUploadSize" value="2097152" />
+        <property name="maxInMemorySize" value="0" />
+    </bean>
+</beans>
