@@ -40,7 +40,7 @@
                 </div>
                 <div class="input-group form-group">
                     <span class="input-group-addon glyphicon glyphicon-lock"></span>
-                    <sf:input path="password" cssClass="form-control" id="password"
+                    <sf:password path="password" cssClass="form-control" id="password"
                               placeholder="请输入密码"/>
                     <div><sf:errors path="password" cssClass="error" /></div>
                 </div>

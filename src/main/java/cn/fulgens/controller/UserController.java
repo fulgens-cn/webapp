@@ -3,6 +3,7 @@ package cn.fulgens.controller;
 import cn.fulgens.entity.User;
 import cn.fulgens.exception.Error;
 import cn.fulgens.exception.UserNotFoundException;
+import cn.fulgens.service.MsgService;
 import cn.fulgens.service.UserService;
 import cn.fulgens.utils.VerifyCodeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,8 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,19 +33,48 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private MsgService msgService;
+
     @GetMapping(value = "/register")
     public String toRegister(Model model) {
         model.addAttribute("user", new User());
         return "register";
     }
 
+    /**
+     * 接收表单提交user数据进行用户注册
+     * @param user
+     * @param bindingResult
+     * @return
+     */
     @PostMapping(value = "/register")
     public String register(@Valid User user, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return "register";
         }
+        // 调用service进行用户注册
         userService.register(user);
+        // 发送用户添加消息（测试activemq）
+        msgService.sendUserAddMsg(user);
         return "redirect:/login";
+    }
+
+    /**
+     * 接收json格式的user数据保存用户
+     * @param user
+     * @param bindingResult
+     * @return
+     */
+    @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public User saveUser(@RequestBody @Valid User user,
+                      BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            // ...
+        }
+        userService.register(user);
+        return user;
     }
 
     @GetMapping(value = "/getVerifyCode")
@@ -105,7 +137,7 @@ public class UserController {
     }
 
     @RequestMapping("/user/remove/{id}")
-    public void removeUser(@PathVariable String id) {
+    public void removeUser(@PathVariable("id") String id) {
         userService.remove(id);
     }
 

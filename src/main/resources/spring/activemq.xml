@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jms="http://www.springframework.org/schema/jms"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/jms
+       http://www.springframework.org/schema/jms/spring-jms.xsd">
+
+    <!-- 配置ActiveMQ连接工厂org.apache.activemq.spring.ActiveMQConnectionFactory -->
+    <bean id="connectionFactory" class="org.apache.activemq.spring.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="tcp://localhost:61616"/>
+        <!-- 配置受信奈的序列化实体包（activeMQ5.12.2后使用ObjectMessage时需配置） -->
+        <!--<property name="trustAllPackages" value="true"/>-->
+        <property name="trustedPackages">
+            <list>
+                <value>cn.fulgens.entity</value>
+                <value>java.util</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- 声明消息目的地 -->
+    <!-- 队列（点对点） -->
+    <bean id="queue" class="org.apache.activemq.command.ActiveMQQueue">
+        <constructor-arg>
+            <value>queue</value>
+        </constructor-arg>
+    </bean>
+    <!-- 主题（发布订阅） -->
+    <bean id="topic" class="org.apache.activemq.command.ActiveMQTopic">
+        <constructor-arg>
+            <value>topic</value>
+        </constructor-arg>
+    </bean>
+
+    <!-- 配置spring提供的jmsTemplate -->
+    <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <!-- 注入连接工厂 -->
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <!-- 设置默认消息目的地 -->
+        <property name="defaultDestination" ref="topic"/>
+        <!-- 设置消息转换器 -->
+        <property name="messageConverter" ref="messageConverter"/>
+    </bean>
+
+    <!-- 配置消息转换器 -->
+    <bean id="messageConverter"
+          class="org.springframework.jms.support.converter.MappingJackson2MessageConverter"/>
+
+    <!-- ObjectMessage额外配置 -->
+    <!-- 1.在连接工厂中设置受信奈的序列化实体包 -->
+    <!-- 2.配置JmsConfiguration同时注入连接工厂 -->
+    <bean id="jmsConfig" class="org.apache.camel.component.jms.JmsConfiguration">
+        <property name="connectionFactory" ref="connectionFactory"/>
+    </bean>
+    <!-- 3.配置ActiveMQComponent同时注入JmsConfiguration -->
+    <bean id="activemq" class="org.apache.activemq.camel.component.ActiveMQComponent">
+        <property name="configuration" ref="jmsConfig"/>
+    </bean>
+
+    <!-- 配置消息监听器 -->
+    <bean id="msgListener" class="cn.fulgens.listener.MsgListener"/>
+
+    <jms:listener-container connection-factory="connectionFactory">
+        <jms:listener destination="topic" ref="msgListener" method="handlerUserAdd"/>
+    </jms:listener-container>
+
+</beans>

@@ -47,12 +47,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authoritiesByUsernameQuery(DEF_AUTHORITIES_BY_USERNAME_QUERY)
                 .passwordEncoder(new Md5PasswordEncoder());
         // 基于LDAP认证（参见spring实战p261，需加入spring-security-ldap模块）
+
+        // 自定义认证逻辑
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.formLogin().loginPage("/login")        // 自定义登录页面
-                    .loginProcessingUrl("login")    // 登录表单POST请求提交地址，需要与登录表单action属性值对应，默认为/login
+                    //.loginProcessingUrl("/login")   // 登录表单POST请求提交地址，需要与登录表单action属性值对应，默认为/login
                     .usernameParameter("username")  // 登录表单用户名提交参数名，默认username
                     .passwordParameter("password")  // 登录表单密码提交参数名，默认password
                 .and()

@@ -10,7 +10,8 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @ComponentScan(basePackages = {"cn.fulgens"}, excludeFilters = {
         @ComponentScan.Filter(type = FilterType.ANNOTATION, value = EnableWebMvc.class)
 })
-@Import({DataSourceConfig.class, SpringDataJpaConfig.class, CacheConfig.class})
+@Import({DataSourceConfig.class, SpringDataJpaConfig.class,
+        ActiveMQConfig.class})
 public class RootConfig {
 
 }

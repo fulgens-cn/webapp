@@ -58,10 +58,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<User> getUserList(Pageable pageable) {
-        // 使用Example查询忽略用户密码
-        ExampleMatcher exampleMatcher = ExampleMatcher.matching().withIgnorePaths("password");
-        Example<User> example = Example.of(new User(), exampleMatcher);
-        return userRepository.findAll(example, pageable);
+        return userRepository.findAll( pageable);
     }
 
     @Override
